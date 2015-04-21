@@ -1,9 +1,13 @@
 # PyDigR
 Python Digit Recognition
 
-**Nécessite Python 2.7.x (incompatible Python 3.x)**
+# Dépendances
 
-# Fichiers et leur utilité
+* Python 2.7.x (incompatible Python 3.x)
+* OpenCV2 (http://opencv.org/)
+* Numpy (http://www.numpy.org/)
+
+# Fichiers du projet
 
 ## crop_and_resize.py
 
