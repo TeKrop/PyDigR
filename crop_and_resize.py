@@ -65,8 +65,8 @@ def redim_picture(img, new_width, new_height):
 	old_height = cv.GetSize(img)[1]
 
 	# Nouvelles dimensions
-	new_width = int(sys.argv[2])
-	new_height = int(sys.argv[3])
+	new_width = int(sys.argv[3])
+	new_height = int(sys.argv[4])
 
 	# On définit la nouvelle image		
 	final_picture = cv2.resize(np.array(img), (new_width, new_height))
@@ -78,7 +78,7 @@ def redim_picture(img, new_width, new_height):
 # Si on a fourni le bon nombre d'arguments (2 ou 4) et si
 # le fichier ciblé existe, alors on fait les manip
 argc = len(sys.argv)
-if (argc is 2 or argc is 4) and os.path.isfile(sys.argv[1]):
+if (argc is 2 or argc is 3 or argc is 5) and os.path.isfile(sys.argv[1]):
 
 	print("Début à " + str(time.clock()) + " secondes")	
 
@@ -101,18 +101,24 @@ if (argc is 2 or argc is 4) and os.path.isfile(sys.argv[1]):
 
 	print("Crop réalisé en " + str(time.clock()) + " secondes")	
 
-	# Si 4 arguments, on vérifie si on peut redimensionner
-	if argc is 4:
+	# Si 5 arguments, on vérifie si on peut redimensionner
+	if argc is 5:
 		# Si les paramètres sont bien des nombres entiers positifs non nul
-		if int(sys.argv[2]) > 0 and int(sys.argv[3]) > 0:
+		if int(sys.argv[3]) > 0 and int(sys.argv[4]) > 0:
 			# On utilise la fonction de redimensionnement
-			final_picture = redim_picture(final_picture, int(sys.argv[2]), int(sys.argv[3]))
+			final_picture = redim_picture(final_picture, int(sys.argv[3]), int(sys.argv[4]))
 			print("Redimensionnement réalisé en " + str(time.clock()) + " secondes")
 		else:
 			print("Redimensionnement non effectué : dimensions données non entières")
 
 	# Affichage		
 	cv2.imshow("Image finale", np.asarray(final_picture))
+
+	# Si on a fourni un nom pour l'image finie
+	if argc >= 3:
+		cv2.imwrite(sys.argv[2] + ".png", np.asarray(final_picture))
+	else:
+		cv2.imwrite("image_finale.png", np.asarray(final_picture))
 	cv2.waitKey(0)
 else:
-	print("Utilisation : python crop.py [cheminImage] ([largeurFinale] [hauteurFinale])")
+	print("Utilisation : python crop.py [cheminImage] ([nomImageFinale] [largeurFinale] [hauteurFinale])")
