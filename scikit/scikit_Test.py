@@ -14,6 +14,10 @@ from sklearn import datasets, svm, metrics
 import skimage.io
 
 
+os.system("python crop_and_resize.py img/3.png samples/3 8 8")
+
+
+
 def load_unknowndata(filenames):
     training = {'images': [], 'targets': [], 'data' : [], 'name' : []}
 
