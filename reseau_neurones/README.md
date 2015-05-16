@@ -1,6 +1,7 @@
-# 5x7 Digit Image Recognition: Python (https://github.com/ayng/digit-recognition)
+# 5x7 Digit Image Recognition par Alex Yang (2014) : Python (https://github.com/ayng/digit-recognition)
 
-You need [Python Imaging Library](http://www.pythonware.com/products/pil/) to run this program.
+Vous avez besoin [Python Imaging Library](http://www.pythonware.com/products/pil/) pour faire tourner le programme
+Document originale :
 
 ## How to run
 
