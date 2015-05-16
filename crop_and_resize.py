@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: Latin-1 -*-
 # Script de cropping et resizing automatique
 # d'un chiffre dessiné sur une photo avec OpenCV
 # @author Valentin PORCHET
@@ -77,48 +77,49 @@ def redim_picture(img, new_width, new_height):
 
 # Si on a fourni le bon nombre d'arguments (2 ou 4) et si
 # le fichier ciblé existe, alors on fait les manip
-argc = len(sys.argv)
-if (argc is 2 or argc is 3 or argc is 5) and os.path.isfile(sys.argv[1]):
+if __name__ == "__main__": #si le fichier appelé est le fichier exécuté (Pour éviter l'exécution si on import)
+	argc = len(sys.argv)
+	if (argc is 2 or argc is 3 or argc is 5) and os.path.isfile(sys.argv[1]):
 
-	print("Début à " + str(time.clock()) + " secondes")	
+		print("Début à " + str(time.clock()) + " secondes")	
 
-	# Chargement de l'image
-	img = cv.LoadImage(sys.argv[1],0)
+		# Chargement de l'image
+		img = cv.LoadImage(sys.argv[1],0)
 
-	# Seuillage
-	img_seuil = img
-	cv.Threshold(img, img_seuil, 127, 255, cv2.THRESH_BINARY_INV)
+		# Seuillage
+		img_seuil = img
+		cv.Threshold(img, img_seuil, 127, 255, cv2.THRESH_BINARY_INV)
 
-	# On trouve la bounding box
-	bb = find_bounding_box(img_seuil)
+		# On trouve la bounding box
+		bb = find_bounding_box(img_seuil)
 
-	# On effectue le cropping
-	final_picture = img[bb[2]:bb[3], bb[0]:bb[1]]
+		# On effectue le cropping
+		final_picture = img[bb[2]:bb[3], bb[0]:bb[1]]
 
-	# On réinverse les couleurs
-	# Trouver mieux (genre la copie img_seuil = img à améliorer)
-	cv.Threshold(img, img_seuil, 127, 255, cv2.THRESH_BINARY_INV)
+		# On réinverse les couleurs
+		# Trouver mieux (genre la copie img_seuil = img à améliorer)
+		cv.Threshold(img, img_seuil, 127, 255, cv2.THRESH_BINARY_INV)
 
-	print("Crop réalisé en " + str(time.clock()) + " secondes")	
+		print("Crop réalisé en " + str(time.clock()) + " secondes")	
 
-	# Si 5 arguments, on vérifie si on peut redimensionner
-	if argc is 5:
-		# Si les paramètres sont bien des nombres entiers positifs non nul
-		if int(sys.argv[3]) > 0 and int(sys.argv[4]) > 0:
-			# On utilise la fonction de redimensionnement
-			final_picture = redim_picture(final_picture, int(sys.argv[3]), int(sys.argv[4]))
-			print("Redimensionnement réalisé en " + str(time.clock()) + " secondes")
+		# Si 5 arguments, on vérifie si on peut redimensionner
+		if argc is 5:
+			# Si les paramètres sont bien des nombres entiers positifs non nul
+			if int(sys.argv[3]) > 0 and int(sys.argv[4]) > 0:
+				# On utilise la fonction de redimensionnement
+				final_picture = redim_picture(final_picture, int(sys.argv[3]), int(sys.argv[4]))
+				print("Redimensionnement réalisé en " + str(time.clock()) + " secondes")
+			else:
+				print("Redimensionnement non effectué : dimensions données non entières")
+
+		# Affichage		
+		cv2.imshow("Image finale", np.asarray(final_picture))
+
+		# Si on a fourni un nom pour l'image finie
+		if argc >= 3:
+			cv2.imwrite(sys.argv[2] + ".png", np.asarray(final_picture))
 		else:
-			print("Redimensionnement non effectué : dimensions données non entières")
-
-	# Affichage		
-	cv2.imshow("Image finale", np.asarray(final_picture))
-
-	# Si on a fourni un nom pour l'image finie
-	if argc >= 3:
-		cv2.imwrite(sys.argv[2] + ".png", np.asarray(final_picture))
+			cv2.imwrite("image_finale.png", np.asarray(final_picture))
+		cv2.waitKey(0)
 	else:
-		cv2.imwrite("image_finale.png", np.asarray(final_picture))
-	cv2.waitKey(0)
-else:
-	print("Utilisation : python crop.py [cheminImage] ([nomImageFinale] [largeurFinale] [hauteurFinale])")
+		print("Utilisation : python crop.py [cheminImage] ([nomImageFinale] [largeurFinale] [hauteurFinale])")
