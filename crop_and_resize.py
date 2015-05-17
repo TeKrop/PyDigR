@@ -20,39 +20,39 @@ marge = 10
 # @param lim_min : limite minimale de la boucle de parcours
 # @param lim_max : limite maximale de la boucle de parcours
 def find_lim(img, func, lim_min, lim_max):
-	lim = 0
-	width = img.width
-	height = img.height
-	min_found = False
+    lim = 0
+    width = img.width
+    height = img.height
+    min_found = False
 
-	# Pour toutes les colonnes (ou lignes)
-	pixels = range(lim_min, lim_max) if lim_min < lim_max else list(reversed(range(lim_max, lim_min)))
+    # Pour toutes les colonnes (ou lignes)
+    pixels = range(lim_min, lim_max) if lim_min < lim_max else list(reversed(range(lim_max, lim_min)))
 
-	for i in pixels:
-		data = func(img, i)  # On prend les données
-		value = cv.Sum(data)  # On les somme
+    for i in pixels:
+        data = func(img, i)  # On prend les données
+        value = cv.Sum(data)  # On les somme
 
-		# Si la somme supérieure à 0, il y a forcément
-		# un pixel blanc, donc une partie du chiffre
-		if (value[0] > 0):
-			lim = i
-			break
+        # Si la somme supérieure à 0, il y a forcément
+        # un pixel blanc, donc une partie du chiffre
+        if (value[0] > 0):
+            lim = i
+            break
 
-	return lim
+    return lim
 
 
 # Permet de trouver la bounding box du chiffre
 # @param img : image seuillée inverse contenant le chiffre
 def find_bounding_box(img):
-	# Initialisation des variables
-	xmin = xmax = ymin = ymax = 0
+    # Initialisation des variables
+    xmin = xmax = ymin = ymax = 0
 
-	# On trouve les coordonnées de la bounding box
-	(xmin, xmax) = (find_lim(img, cv.GetCol, 0, img.width), find_lim(img, cv.GetCol, img.width, 0))
-	(ymin, ymax) = (find_lim(img, cv.GetRow, 0, img.height), find_lim(img, cv.GetRow, img.height, 0))
+    # On trouve les coordonnées de la bounding box
+    (xmin, xmax) = (find_lim(img, cv.GetCol, 0, img.width), find_lim(img, cv.GetCol, img.width, 0))
+    (ymin, ymax) = (find_lim(img, cv.GetRow, 0, img.height), find_lim(img, cv.GetRow, img.height, 0))
 
-	# On retourne le résultat margé
-	return (xmin - marge, xmax + marge, ymin - marge, ymax + marge)
+    # On retourne le résultat margé
+    return (xmin - marge, xmax + marge, ymin - marge, ymax + marge)
 
 
 # Permet de redimensionner l'image en gardant l'aspect ratio
@@ -60,18 +60,33 @@ def find_bounding_box(img):
 # @param new_width : nouvelle largeur
 # @param new_height : nouvelle hauteur
 def redim_picture(img, new_width, new_height):
-	# Anciennes dimensions
-	old_width = cv.GetSize(img)[0]
-	old_height = cv.GetSize(img)[1]
+    # Anciennes dimensions
+    old_width = cv.GetSize(img)[0]
+    old_height = cv.GetSize(img)[1]
 
-	# Nouvelles dimensions
-	new_width = int(sys.argv[3])
-	new_height = int(sys.argv[4])
+    # Nouvelles dimensions
+    new_width = int(sys.argv[3])
+    new_height = int(sys.argv[4])
 
-	# On définit la nouvelle image		
-	final_picture = cv2.resize(np.array(img), (new_width, new_height))
+    # On va flouter légèrement pour avoir plus d'épaisseur
+    final_picture = cv2.blur(np.array(img), (100,100))
 
-	return final_picture
+    # On redimensionne
+    final_picture = cv2.resize(np.array(final_picture), (new_width, new_height), interpolation=cv2.INTER_CUBIC)
+
+    # On va traiter le résultat, et unifier l'image
+    # Petite fonction de seuillage maison
+    h, w = final_picture.shape[:2]
+    for i in range(0, h):
+        for j in range(0, w):            
+            pixel_value = final_picture.item(i,j)
+            if pixel_value != 255:
+                final_picture.itemset((i,j),0)
+
+    # On remet bien l'image en RVB
+    final_picture = cv2.cvtColor(final_picture, cv.CV_GRAY2RGB)
+
+    return final_picture
 
 ## FONCTION PRINCIPALE
 
@@ -80,45 +95,45 @@ def redim_picture(img, new_width, new_height):
 argc = len(sys.argv)
 if (argc is 2 or argc is 3 or argc is 5) and os.path.isfile(sys.argv[1]):
 
-	print("Début à " + str(time.clock()) + " secondes")	
+    print("Début à " + str(time.clock()) + " secondes") 
 
-	# Chargement de l'image
-	img = cv.LoadImage(sys.argv[1],0)
+    # Chargement de l'image
+    img = cv.LoadImage(sys.argv[1],0)
 
-	# Seuillage
-	img_seuil = img
-	cv.Threshold(img, img_seuil, 127, 255, cv2.THRESH_BINARY_INV)
+    # Seuillage
+    img_seuil = img
+    cv.Threshold(img, img_seuil, 127, 255, cv2.THRESH_BINARY_INV)
 
-	# On trouve la bounding box
-	bb = find_bounding_box(img_seuil)
+    # On trouve la bounding box
+    bb = find_bounding_box(img_seuil)
 
-	# On effectue le cropping
-	final_picture = img[bb[2]:bb[3], bb[0]:bb[1]]
+    # On effectue le cropping
+    final_picture = img[bb[2]:bb[3], bb[0]:bb[1]]
 
-	# On réinverse les couleurs
-	# Trouver mieux (genre la copie img_seuil = img à améliorer)
-	cv.Threshold(img, img_seuil, 127, 255, cv2.THRESH_BINARY_INV)
+    # On réinverse les couleurs
+    # Trouver mieux (genre la copie img_seuil = img à améliorer)
+    cv.Threshold(img, img_seuil, 127, 255, cv2.THRESH_BINARY_INV)
 
-	print("Crop réalisé en " + str(time.clock()) + " secondes")	
+    print("Crop réalisé en " + str(time.clock()) + " secondes") 
 
-	# Si 5 arguments, on vérifie si on peut redimensionner
-	if argc is 5:
-		# Si les paramètres sont bien des nombres entiers positifs non nul
-		if int(sys.argv[3]) > 0 and int(sys.argv[4]) > 0:
-			# On utilise la fonction de redimensionnement
-			final_picture = redim_picture(final_picture, int(sys.argv[3]), int(sys.argv[4]))
-			print("Redimensionnement réalisé en " + str(time.clock()) + " secondes")
-		else:
-			print("Redimensionnement non effectué : dimensions données non entières")
+    # Si 5 arguments, on vérifie si on peut redimensionner
+    if argc is 5:
+        # Si les paramètres sont bien des nombres entiers positifs non nul
+        if int(sys.argv[3]) > 0 and int(sys.argv[4]) > 0:
+            # On utilise la fonction de redimensionnement
+            final_picture = redim_picture(final_picture, int(sys.argv[3]), int(sys.argv[4]))            
+            print("Redimensionnement réalisé en " + str(time.clock()) + " secondes")
+        else:
+            print("Redimensionnement non effectué : dimensions données non entières")
 
-	# Affichage		
-	cv2.imshow("Image finale", np.asarray(final_picture))
+    # Affichage
+    # cv2.imshow("Image finale", np.asarray(final_picture))
 
-	# Si on a fourni un nom pour l'image finie
-	if argc >= 3:
-		cv2.imwrite(sys.argv[2] + ".png", np.asarray(final_picture))
-	else:
-		cv2.imwrite("image_finale.png", np.asarray(final_picture))
-	cv2.waitKey(0)
+    # Si on a fourni un nom pour l'image finie
+    if argc >= 3:
+        cv2.imwrite(sys.argv[2] + ".png", np.asarray(final_picture))
+    else:
+        cv2.imwrite("image_finale.png", np.asarray(final_picture))
+    cv2.waitKey(0)
 else:
-	print("Utilisation : python crop.py [cheminImage] ([nomImageFinale] [largeurFinale] [hauteurFinale])")
+    print("Utilisation : python crop_and_resize.py [cheminImage] ([nomImageFinale] [largeurFinale] [hauteurFinale])")
