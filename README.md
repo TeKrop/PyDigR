@@ -16,4 +16,4 @@ Python Digit Recognition
     @param [largeurFinale hauteurFinale] : dimensions à rentrer pour le redimensionnement (optionnel)
 
 Script python permettant de détecter une forme dans une image binaire et d'effectuer un rognage autour de celle-ci. Nous l'utilisons par exemple pour trouver un chiffre écrit noir sur blanc sur un tableau qui a été pris en photo.
-(A voir si on implémente une méthode pour nettoyer le bruit environnant, avec méthode de connexité par exemple)
+(A voir si on implémente une méthode pour nettoyer le bruit environnant, avec méthode de connexité par exemple
